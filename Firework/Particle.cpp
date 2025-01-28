@@ -16,8 +16,10 @@ void Particle::update(float deltaTime) {
 	position.x += velocity.x * deltaTime;
 	position.y += velocity.y * deltaTime;
 	lifespan -= 1 * deltaTime;
-	std::cout << position.x << std::endl;
+	//std::cout << "X: " << position.x << " " << "Y: " << position.y << std::endl;
+	//std::cout << lifespan << std::endl;
 	color.a = static_cast<int>(255 * (lifespan * 60.f));
+
 
 }
 

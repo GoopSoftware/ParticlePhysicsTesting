@@ -19,12 +19,13 @@ public:
 
 	bool isAlive() const { return lifespan > 0; }
 	void cleanup(std::vector<Particle*> particles);
+	float lifespan;
+
 
 private:
 
 	Vector2 position;
 	Vector2 velocity;
-	float lifespan;
 	Color color;
 	int particleSize;
 

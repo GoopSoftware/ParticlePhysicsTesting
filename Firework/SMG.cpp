@@ -1,20 +1,18 @@
-#include "Pistol.h"
+#include "SMG.h"
 
-Pistol::Pistol() 
-{
+
+SMG::SMG() {
 
 }
 
-Pistol::~Pistol() {
-
+SMG::~SMG() {
+	
 	for (Particle* b : bullets) {
 		delete b;
 	}
-
 }
 
-
-void Pistol::fire(Vector2 playerPos, Vector2 mousePos) {
+void SMG::fire(Vector2 playerPos, Vector2 mousePos) {
 
 	Vector2 direction = { mousePos.x - playerPos.x, mousePos.y - playerPos.y };
 	float length = sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -23,12 +21,12 @@ void Pistol::fire(Vector2 playerPos, Vector2 mousePos) {
 		direction.y /= length;
 	}
 
-	float speed = 2500.f;
-	Vector2 bulletVelocity = { direction.x * speed, direction.y * speed };
+	float speedOffset = (rand() % 700 + 1000);
+	Vector2 bulletVelocity = { direction.x * speedOffset, direction.y * speedOffset };
 	bullets.push_back(new Particle(playerPos, bulletVelocity, 1.f, DARKGRAY));
 }
 
-void Pistol::update(float deltaTime) {
+void SMG::update(float deltaTime) {
 	for (auto& bullet : bullets) {
 		bullet->update(deltaTime);
 	}
@@ -36,7 +34,7 @@ void Pistol::update(float deltaTime) {
 	bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](Particle* b) {return !b->isAlive();}), bullets.end());
 }
 
-void Pistol::draw() {
+void SMG::draw() {
 	for (auto& bullet : bullets) {
 		bullet->draw();
 	}

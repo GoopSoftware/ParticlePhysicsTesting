@@ -1,11 +1,13 @@
 #include <iostream>
 #include "raylib.h"
+#include "raymath.h"
 
 #include "Firework.h"
 
 #include "Weapon.h"
 #include "Pistol.h"
-
+#include "Shotgun.h"
+#include "SMG.h"
 
 /* ------------------  ToDo: --------------------
 Figure out why particles will blink into existence
@@ -15,7 +17,8 @@ Figure out why particles will blink into existence
 
 enum class WeaponType {
 	PISTOL,
-	SHOTGUN
+	SHOTGUN,
+	SMG
 };
 
 
@@ -35,8 +38,7 @@ int main() {
 	WeaponType currentWeaponType = WeaponType::PISTOL;
 
 	std::vector<Firework*> fireworks;
-	std::vector<Particle*> bullets;
-	//std::vector<Particle*> bullets = currentWeapon->getBullets();
+
 	
 
 	while (!WindowShouldClose()) {
@@ -47,10 +49,21 @@ int main() {
 			Vector2 spawnPos = GetMousePosition();
 			fireworks.push_back(new Firework(spawnPos, deltaTime));
 		}
-		if (IsKeyDown(KEY_A)) { playerPos.x -= 5; }
-		if (IsKeyDown(KEY_D)) { playerPos.x += 5; }
-		if (IsKeyDown(KEY_W)) { playerPos.y -= 5; }
-		if (IsKeyDown(KEY_S)) { playerPos.y += 5; }
+
+		Vector2 movement = { 0, 0 };
+
+		if (IsKeyDown(KEY_A)) { movement.x -= 5; }
+		if (IsKeyDown(KEY_D)) { movement.x += 5; }
+		if (IsKeyDown(KEY_W)) { movement.y -= 5; }
+		if (IsKeyDown(KEY_S)) { movement.y += 5; }
+
+		if (movement.x != 0 || movement.y != 0) { 
+			movement = Vector2Normalize(movement);
+		}
+
+		playerPos.x += movement.x * 5;
+		playerPos.y += movement.y * 5;
+
 
 		if (IsKeyPressed(KEY_ONE)) {
 			if (currentWeaponType != WeaponType::PISTOL) {
@@ -60,26 +73,31 @@ int main() {
 			}
 		}
 		if (IsKeyPressed(KEY_TWO)) {
+			if (currentWeaponType != WeaponType::SMG) {
+				currentWeaponType = WeaponType::SMG;
+				delete currentWeapon;
+				currentWeapon = new SMG();
+			}
+		}
+		if (IsKeyPressed(KEY_THREE)) {
 			if (currentWeaponType != WeaponType::SHOTGUN) {
 				currentWeaponType = WeaponType::SHOTGUN;
 				delete currentWeapon;
-				//currentWeapon = new Shotgun();
+				currentWeapon = new Shotgun();
 			}
 		}
 		
-		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			Vector2 mousePos = GetMousePosition();	
-			Vector2 direction = { mousePos.x - playerPos.x, mousePos.y - playerPos.y };
-			float length = sqrt(direction.x * direction.x + direction.y * direction.y);
-			if (length != 0) {
-				direction.x /= length;
-				direction.y /= length;
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			if (currentWeaponType == WeaponType::SMG) {
+				currentWeapon->fire(playerPos, GetMousePosition());
 			}
-			std::cout << "FIRING" << std::endl;
-			Vector2 bulletVelocity = { direction.x * 600.f, direction.y * 600.f };
-			if (currentWeaponType == WeaponType::PISTOL) {
-				bullets.push_back(new Particle(playerPos, bulletVelocity, 2.5f, DARKGRAY));
+			else {
+				if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+					currentWeapon->fire(playerPos, GetMousePosition());
+
+				}
 			}
+		
 		}
 
 
@@ -87,13 +105,10 @@ int main() {
 			firework->update(deltaTime);
 		}
 
-		for (auto& bullet : bullets) {
-			bullet->update(deltaTime);
-		}
+		currentWeapon->update(deltaTime);
 
 
 		fireworks.erase(std::remove_if(fireworks.begin(), fireworks.end(), [](Firework* f) {return f->particles.empty();}), fireworks.end());
-		bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](Particle* p) {return !p->isAlive();}), bullets.end());
 
 
 		BeginDrawing();
@@ -105,11 +120,7 @@ int main() {
 		for (auto& firework : fireworks) {
 			firework->draw();
 		}
-
-		for (auto& bullet : bullets) {
-			bullet->draw();
-		}
-
+		currentWeapon->draw();
 
 		EndDrawing();
 
@@ -119,10 +130,6 @@ int main() {
 
 	for (auto& firework : fireworks) {
 		delete firework;
-	}
-
-	for (auto& bullet : bullets) {
-		delete bullet;
 	}
 
 	

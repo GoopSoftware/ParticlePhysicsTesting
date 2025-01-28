@@ -2,25 +2,26 @@
 
 #include "Weapon.h"
 #include "Particle.h"
-#include <Vector>
+#include <vector>
 
 
-class Pistol : public Weapon 
+class Shotgun : public Weapon
 {
 
 public:
 
-	Pistol();
-	~Pistol();
+	Shotgun();
+	~Shotgun();
 
 	void fire(Vector2 playerPos, Vector2 mousePos) override;
 	void update(float deltaTime) override;
-	void draw() override;
+	void draw();
 	std::vector<Particle*> bullets;
 
 
 private:
 
+	int maxBullets = 6;
 
 };
 
